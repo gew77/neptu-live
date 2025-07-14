@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hitung Neptu Weton</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-tr from-purple-100 via-pink-100 to-rose-200 min-h-screen flex items-center justify-center p-6 font-[Poppins] text-gray-800">
+
+  <div class="bg-white/90 backdrop-blur-xl border border-white/30 rounded-3xl shadow-xl p-6 w-full max-w-md transition-all duration-300 hover:shadow-2xl">
+    <h1 class="text-3xl font-[Pacifico] text-pink-500 text-center mb-4">🔮 Hitung Neptu Weton</h1>
+    <p class="text-sm text-center mb-4 text-gray-600">Berdasarkan Hari & Pasaran Jawa</p>
+
+    <div id="formInput">
+      <input type="date" id="tanggal" class="border w-full px-4 py-2 mb-4 rounded shadow-sm"/>
+      <button onclick="hitungNeptu()" class="w-full bg-pink-500 text-white py-2 rounded hover:bg-pink-600 transition">Hitung</button>
+    </div>
+
+    <div id="hasil" class="mt-6 hidden">
+      <p><strong>Hari:</strong> <span id="hari"></span></p>
+      <p><strong>Pasaran:</strong> <span id="pasaran"></span></p>
+      <p><strong>Jumlah Neptu:</strong> <span id="jumlah"></span></p>
+      <p class="mt-2 text-sm text-gray-700"><strong>Karakter Umum:</strong> <span id="deskripsi"></span></p>
+      <button onclick="resetForm()" class="mt-4 w-full bg-gray-400 text-white py-2 rounded hover:bg-gray-500">Hitung Ulang</button>
+    </div>
+  </div>
+
+  <script>
+    const neptuHari = {
+      "Minggu": 5, "Senin": 4, "Selasa": 3, "Rabu": 7,
+      "Kamis": 8, "Jumat": 6, "Sabtu": 9
+    };
+
+    const neptuPasaran = {
+      "Legi": 5, "Pahing": 9, "Pon": 7, "Wage": 4, "Kliwon": 8
+    };
+
+    const pasaranList = ["Wage", "Kliwon", "Legi", "Pahing", "Pon"];
+
+    const deskripsiNeptu = {
+      7: "Kamu dikenal sebagai sosok yang tenang dan bijaksana. Meskipun jarang banyak bicara, tapi sekali bicara selalu tepat sasaran. Cocok jadi penengah dan pendamai dalam konflik.",
+      8: "Kamu terlihat pendiam, tapi sebenarnya sangat peka dan sensitif. Sering menyimpan perasaan sendiri, namun punya empati besar terhadap sekitar.",
+      9: "Ramah, suka ngobrol, dan cepat akrab dengan siapa pun. Cocok jadi jembatan komunikasi dalam keluarga atau lingkungan sosial.",
+      10: "Kamu orangnya nrimo dan rendah hati. Tidak suka merepotkan orang lain, dan punya aura sabar yang bikin orang nyaman di dekatmu.",
+      11: "Jiwa spiritualmu kuat. Kamu sering merenung dan memikirkan makna hidup lebih dalam dari orang lain. Cocok jadi penasehat atau teman diskusi reflektif.",
+      12: "Kamu suka membantu tanpa pamrih. Jiwa sosialmu tinggi dan mudah tersentuh melihat ketidakadilan atau penderitaan orang lain.",
+      13: "Otak kamu encer, cepat tangkap, dan suka berpikir kritis. Kadang bisa keras kepala, tapi itu karena kamu yakin sama pemikiranmu sendiri.",
+      14: "Kamu punya prinsip hidup yang jelas. Tegas dalam bersikap, tapi tetap adil dan terbuka terhadap pendapat orang lain.",
+      15: "Punya kemampuan adaptasi yang hebat. Kamu bisa nyambung dengan banyak tipe orang, tapi tetap menjaga nilai-nilai yang kamu pegang.",
+      16: "Kamu sangat bertanggung jawab dan bisa diandalkan. Dalam hal hubungan, kamu termasuk orang yang setia dan serius.",
+      17: "Lebih suka ketenangan daripada keramaian. Kamu cenderung spiritual dan sering butuh waktu sendiri untuk recharge.",
+      18: "Memiliki daya tarik alami yang bikin orang suka padamu. Kamu tahu caranya membawa diri di segala situasi.",
+      19: "Penuh rasa percaya diri dan tahu arah hidupmu. Orang lain sering melihatmu sebagai figur yang kuat dan bisa diteladani.",
+      20: "Jiwa kepemimpinanmu kuat. Kamu punya kemampuan mengatur, mengayomi, dan memengaruhi orang di sekitarmu.",
+      21: "Tangguh dan tidak mudah menyerah. Ujian hidup sering datang, tapi kamu selalu berhasil bangkit lebih kuat.",
+      22: "Introvert yang sensitif dan penuh perasaan. Meski terlihat tenang, batinmu kadang ramai oleh pemikiran mendalam.",
+      23: "Kamu pekerja keras dan fokus pada hasil. Tidak suka basa-basi, tapi sangat kompeten di bidang yang kamu tekuni.",
+      24: "Sangat loyal terhadap keluarga dan orang terdekat. Kamu punya naluri memelihara dan menjaga orang lain.",
+      25: "Logis, realistis, dan penuh perhitungan. Kamu tidak mudah termakan emosi, tapi kadang terlalu kaku dalam berpikir.",
+      26: "Tertutup tapi perhatian. Kamu tidak suka jadi pusat perhatian, tapi sebenarnya sangat peduli pada orang sekitar.",
+      27: "Punya sisi romantis dan seni yang kuat. Cocok dalam dunia kreatif, atau sekadar jadi teman cerita yang menyenangkan.",
+      28: "Cinta damai dan selalu berusaha menghindari konflik. Tapi kamu juga punya batas dan tidak suka dipaksa.",
+      29: "Dalam dan filosofis. Kamu sering melihat dunia dengan sudut pandang yang berbeda dari orang kebanyakan.",
+      30: "Ambisius dan terarah. Kamu selalu punya goal yang jelas, dan bekerja keras untuk mencapainya.",
+      31: "Berpendirian kuat dan tidak gampang goyah. Kamu tahu apa yang kamu mau, meskipun kadang terlihat keras kepala.",
+      32: "Optimis dan enerjik. Kamu sering jadi penyemangat buat orang lain, dan selalu melihat sisi baik dari setiap kejadian.",
+      33: "Suka berbagi ilmu dan pengalaman. Kamu punya jiwa pengajar alami dan sering jadi tempat curhat banyak orang.",
+      34: "Independen dan suka kebebasan. Tidak suka diatur, tapi sangat bertanggung jawab atas pilihan hidupmu sendiri.",
+      35: "Sosok pemimpin alami yang disegani. Kamu punya wibawa, ketegasan, dan empati yang seimbang."
+    };
+
+    function hitungNeptu() {
+      const tgl = document.getElementById("tanggal").value;
+      if (!tgl) return alert("Masukkan tanggal lahir dulu!");
+
+      const date = new Date(tgl);
+      const hari = date.toLocaleDateString("id-ID", { weekday: "long" });
+
+      const base = new Date(1970, 0, 2);
+      const diffMs = date.getTime() - base.getTime();
+      const pembagian = (diffMs + 86400000) / 432000000;
+      const pecahan = pembagian - Math.floor(pembagian);
+      const sisaFloat = (pecahan * 10) / 2;
+      const sisa = Math.round(sisaFloat) % 5;
+
+      const pasaran = pasaranList[sisa];
+      const nilaiHari = neptuHari[hari];
+      const nilaiPasaran = (pasaran in neptuPasaran) ? neptuPasaran[pasaran] : null;
+
+      if (nilaiHari == null || nilaiPasaran == null) {
+        alert("Perhitungan tidak valid. Coba tanggal lain.");
+        return;
+      }
+
+      const jumlahNeptu = nilaiHari + nilaiPasaran;
+      const deskripsi = deskripsiNeptu[jumlahNeptu] || "Deskripsi belum tersedia.";
+
+      document.getElementById("hari").textContent = hari;
+      document.getElementById("pasaran").textContent = pasaran;
+      document.getElementById("jumlah").textContent = jumlahNeptu;
+      document.getElementById("deskripsi").textContent = deskripsi;
+
+      document.getElementById("formInput").classList.add("hidden");
+      document.getElementById("hasil").classList.remove("hidden");
+
+      speakResult(hari, pasaran, jumlahNeptu, deskripsi);
+    }
+
+    function resetForm() {
+      document.getElementById("tanggal").value = "";
+      document.getElementById("formInput").classList.remove("hidden");
+      document.getElementById("hasil").classList.add("hidden");
+    }
+
+    function speakResult(hari, pasaran, jumlahNeptu, deskripsi) {
+      const msg = new SpeechSynthesisUtterance();
+      msg.text = `Hari lahir: ${hari}, Pasaran: ${pasaran}, Jumlah Neptu: ${jumlahNeptu}, Karakter umum: ${deskripsi}`;
+      msg.lang = "id-ID";
+
+      let voices = window.speechSynthesis.getVoices();
+      if (voices.length === 0) {
+        window.speechSynthesis.onvoiceschanged = () => {
+          voices = window.speechSynthesis.getVoices();
+          const idVoice = voices.find(v => v.lang.includes("id-ID") || v.name.toLowerCase().includes("indonesian"));
+          msg.voice = idVoice || voices[0];
+          speechSynthesis.speak(msg);
+        };
+      } else {
+        const idVoice = voices.find(v => v.lang.includes("id-ID") || v.name.toLowerCase().includes("indonesian"));
+        msg.voice = idVoice || voices[0];
+        speechSynthesis.speak(msg);
+      }
+    }
+  </script>
+
+</body>
+</html>
